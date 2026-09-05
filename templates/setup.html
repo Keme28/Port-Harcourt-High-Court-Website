@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Setup portal · High Court Portal</title>
+  <base href="/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/app.css">
+</head>
+<body class="auth-body">
+  <div class="auth-shell">
+    <div class="auth-header">
+      <div class="auth-brand">
+        <img src="/static/icon.png" alt="High Court Portal logo">
+        <div>
+          <h1>High Court Portal</h1>
+        </div>
+      </div>
+      <div class="auth-tag">Initial setup</div>
+    </div>
+    <div class="card">
+      <form class="auth-form" method="post" action="/setup">
+        <div>
+          <h2>Create your account</h2>
+          <p class="auth-copy">Set the first desk administrator before you open the filing workspace.</p>
+        </div>
+
+        {% if error %}
+        <div class="auth-error">{{ error }}</div>
+        {% endif %}
+
+        <label>
+          Full name
+          <input type="text" name="display_name" placeholder="Registrar name" value="{{ request.query_params.get('display_name', '') }}" required>
+        </label>
+
+        <label>
+          Username
+          <input type="text" name="username" autocomplete="username" placeholder="registrar" required>
+        </label>
+
+        <label>
+          Email address (optional)
+          <input type="email" name="email" autocomplete="email" placeholder="registrar@court.gov.ng">
+        </label>
+
+        <label>
+          Password
+          <input type="password" name="password" autocomplete="new-password" placeholder="At least 8 characters" required>
+        </label>
+
+        <label>
+          Confirm password
+          <input type="password" name="confirm_password" autocomplete="new-password" placeholder="Repeat your password" required>
+        </label>
+
+        <div class="auth-actions">
+          <button class="btn gold" type="submit">Create account</button>
+        </div>
+
+        <div class="auth-links">
+          Already configured? <a href="/login">Go to sign in</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</body>
+</html>

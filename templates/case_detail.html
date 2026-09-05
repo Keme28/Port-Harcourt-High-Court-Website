@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block title %}{{ case['SUIT NUMBER'] }} · High Court Portal{% endblock %}
+{% block content %}
+<div class="topbar">
+  <div>
+    <p class="kicker">{{ case['CASE TYPE'] }} · {{ case.STATUS }}</p>
+    <h2>{{ case['SUIT NUMBER'] }}</h2>
+    <p class="meta">{{ case.PARTIES }} · {{ case.age_display or 'Age pending date filed' }}</p>
+  </div>
+  <div class="actions">
+    <a class="btn" href="/?tab=hearings&suit={{ case['SUIT NUMBER'] }}">Record sitting</a>
+    <a class="btn ghost" href="/?tab=register">Back to register</a>
+    <a class="btn danger" href="/?tab=delete&kind=case&suit={{ case['SUIT NUMBER'] }}">Delete matter</a>
+  </div>
+</div>
+
+{% if errors %}
+<div class="errors">{% for error in errors %}<div>{{ error }}</div>{% endfor %}</div>
+{% endif %}
+
+<form class="card stack" method="post" action="/register/{{ case['SUIT NUMBER'] }}">
+  <div class="fields">
+    <label>Suit number
+      <input name="SUIT NUMBER" value="{{ case['SUIT NUMBER'] }}" required>
+    </label>
+    <label>Status
+      <select name="STATUS">
+        {% for item in catalogs.status %}
+        <option value="{{ item }}" {% if case.STATUS == item %}selected{% endif %}>{{ item }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label class="full">Parties
+      <textarea name="PARTIES" required>{{ case.PARTIES }}</textarea>
+    </label>
+    <label>Case type
+      <select name="CASE TYPE">
+        {% for item in catalogs.case_types %}
+        <option value="{{ item }}" {% if case['CASE TYPE'] == item %}selected{% endif %}>{{ item }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>Nature of claim
+      <select name="NATURE OF CLAIM" data-current="{{ case['NATURE OF CLAIM'] }}">
+        <option value="">Select nature</option>
+      </select>
+    </label>
+    <label>Particulars
+      <select name="PARTICULARS" data-current="{{ case.PARTICULARS }}">
+        <option value="">Select particulars</option>
+      </select>
+    </label>
+    <label>Details
+      <select name="DETAILS" data-current="{{ case.DETAILS }}">
+        <option value="">Select details</option>
+      </select>
+    </label>
+    <label>Claimant counsel
+      <input name="CLAIMANT COUNSEL" value="{{ case['CLAIMANT COUNSEL'] }}">
+      {% if case['CLAIMANT COUNSEL'] %}<a href="/?tab=counsel&name={{ case['CLAIMANT COUNSEL']|urlencode }}">Open all matters for this counsel</a>{% endif %}
+    </label>
+    <label>Defendant counsel
+      <input name="DEFENDANT COUNSEL" value="{{ case['DEFENDANT COUNSEL'] }}">
+      {% if case['DEFENDANT COUNSEL'] %}<a href="/?tab=counsel&name={{ case['DEFENDANT COUNSEL']|urlencode }}">Open all matters for this counsel</a>{% endif %}
+    </label>
+    <label>Claimant phone
+      <input name="PHONE NUMBER" value="{{ case['PHONE NUMBER'] }}">
+    </label>
+    <label>Defendant phone
+      <input name="PHONE NUMBER2" value="{{ case['PHONE NUMBER2'] }}">
+    </label>
+    <label>Claimant email
+      <input name="E-MAIL" value="{{ case['E-MAIL'] }}">
+    </label>
+    <label>Defendant email
+      <input name="E-MAIL2" value="{{ case['E-MAIL2'] }}">
+    </label>
+    <label>Date filed
+      <input type="date" name="DATE FILED" value="{{ case['DATE FILED'] }}">
+    </label>
+    <label>Date assigned
+      <input type="date" name="DATE ASSIGNED" value="{{ case['DATE ASSIGNED'] }}">
+    </label>
+    <label>Trial commenced
+      <input type="date" name="DATE TRIAL COMMENCED" value="{{ case['DATE TRIAL COMMENCED'] }}">
+    </label>
+    <label>Date concluded
+      <input type="date" name="DATE CONCLUDED" value="{{ case['DATE CONCLUDED'] }}">
+    </label>
+  </div>
+  <div class="actions">
+    <button class="btn gold" type="submit">Save to Excel register</button>
+  </div>
+</form>
+
+<section class="card" style="margin-top:16px">
+  <h3>Hearing history</h3>
+  {% if hearings %}
+  <table>
+    <thead><tr><th>Date</th><th>Purpose</th><th>Outcome</th><th>Next</th><th>Next date</th></tr></thead>
+    <tbody>
+    {% for h in hearings %}
+      <tr>
+        <td>{{ h['HEARING DATE'] }}</td>
+        <td>{{ h.PURPOSE }}</td>
+        <td>{{ h.OUTCOME }}</td>
+        <td>{{ h['NEXT ACTION'] }}</td>
+        <td>{{ h['NEXT DATE'] }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="empty">No sitting recorded yet.</p>
+  {% endif %}
+</section>
+<script id="lookup-data" type="application/json">{{ catalogs | tojson }}</script>
+{% endblock %}

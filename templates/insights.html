@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% block title %}Insights · High Court Portal{% endblock %}
+{% block content %}
+<div class="topbar">
+  <div>
+    <p class="kicker">Judicial performance analytics</p>
+    <h2>Insights</h2>
+    <p class="meta">{{ stats.quarter }} {{ stats.year }} · {{ stats.start }} to {{ stats.end }}</p>
+  </div>
+  <form class="toolbar" method="get" action="/">
+    <input type="hidden" name="tab" value="insights">
+    <label>Year <input type="number" name="year" value="{{ year }}"></label>
+    <label>Quarter
+      <select name="quarter">
+        {% for item in catalogs.quarters %}
+        <option value="{{ item }}" {% if quarter == item %}selected{% endif %}>{{ item }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <button type="submit">Refresh</button>
+  </form>
+</div>
+
+<div class="grid stats">
+  <div class="card stat"><div class="num">{{ stats.active }}</div><div class="lbl">Active cases</div></div>
+  <div class="card stat"><div class="num">{{ stats.concluded }}</div><div class="lbl">Total concluded</div></div>
+  <div class="card stat"><div class="num">{{ stats.assigned_this_quarter }}</div><div class="lbl">Assigned this quarter</div></div>
+  <div class="card stat"><div class="num">{{ stats.judgments_this_quarter }}</div><div class="lbl">Judgments delivered</div></div>
+</div>
+
+<!-- Judgments Delivered in this Quarter -->
+<section class="card" style="margin-top:16px">
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+    <h3 style="margin:0;">Judgments Delivered in {{ stats.quarter }} {{ stats.year }} ({{ stats.judgments_this_quarter }})</h3>
+    <a href="/?tab=quarter&year={{ year }}&quarter={{ quarter }}" class="btn ghost" style="padding:6px 12px; font-size:0.85rem;">View NJC Return</a>
+  </div>
+  {% if stats.judgments %}
+  <table>
+    <thead>
+      <tr>
+        <th style="width:120px;">Date</th>
+        <th style="width:160px;">Suit Number</th>
+        <th>Parties</th>
+        <th style="width:130px;">Case Type</th>
+        <th style="width:160px;">Nature / Claim</th>
+        <th style="width:180px;">Outcome</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for j in stats.judgments %}
+      <tr>
+        <td><strong>{{ j.date }}</strong></td>
+        <td><a href="/?tab=case&suit={{ j.suit }}">{{ j.suit }}</a></td>
+        <td>{{ j.parties or '—' }}</td>
+        <td><span class="badge">{{ j.case_type or '—' }}</span></td>
+        <td>{{ j.nature or '—' }}</td>
+        <td><span class="badge judgment">{{ j.outcome }}</span></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="empty" style="margin:8px 0;">No judgments recorded for {{ stats.quarter }} {{ stats.year }}. When a judgment is logged in sitting notes or marked concluded on the register, it will be listed here.</p>
+  {% endif %}
+</section>
+
+<!-- Rulings Delivered in this Quarter -->
+{% if stats.rulings %}
+<section class="card" style="margin-top:16px">
+  <h3 style="margin:0 0 12px 0;">Rulings Delivered in {{ stats.quarter }} {{ stats.year }} ({{ stats.rulings_this_quarter }})</h3>
+  <table>
+    <thead>
+      <tr>
+        <th style="width:120px;">Date</th>
+        <th style="width:160px;">Suit Number</th>
+        <th>Parties</th>
+        <th style="width:130px;">Case Type</th>
+        <th>Purpose</th>
+        <th style="width:180px;">Outcome</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in stats.rulings %}
+      <tr>
+        <td><strong>{{ r.date }}</strong></td>
+        <td><a href="/?tab=case&suit={{ r.suit }}">{{ r.suit }}</a></td>
+        <td>{{ r.parties or '—' }}</td>
+        <td><span class="badge">{{ r.case_type or '—' }}</span></td>
+        <td>{{ r.purpose or '—' }}</td>
+        <td><span class="badge ruling">{{ r.outcome }}</span></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endif %}
+
+<div class="grid split" style="margin-top:16px">
+  <section class="card">
+    <h3>Age of active cases</h3>
+    <table>
+      <tr><th>0–3 years</th><td>{{ stats.age_buckets['0-3'] }}</td></tr>
+      <tr><th>4–6 years</th><td>{{ stats.age_buckets['4-6'] }}</td></tr>
+      <tr><th>7+ years</th><td>{{ stats.age_buckets['7+'] }}</td></tr>
+    </table>
+  </section>
+  <section class="card">
+    <h3>On the register by type</h3>
+    <table>
+      {% for key, value in stats.by_type.items() %}
+      <tr><th>{{ key }}</th><td>{{ value }}</td></tr>
+      {% else %}
+      <tr><td colspan="2" class="empty">No cases yet.</td></tr>
+      {% endfor %}
+    </table>
+  </section>
+</div>
+
+<section class="card" style="margin-top:16px">
+  <h3>Next action load</h3>
+  <table>
+    {% for key, value in stats.next_counts.items() %}
+    <tr><th>{{ key }}</th><td>{{ value }}</td></tr>
+    {% else %}
+    <tr><td colspan="2" class="empty">No hearing outcomes recorded.</td></tr>
+    {% endfor %}
+  </table>
+</section>
+{% endblock %}

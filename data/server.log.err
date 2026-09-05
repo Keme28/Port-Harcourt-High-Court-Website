@@ -1,0 +1,12 @@
+INFO:     Started server process [15568]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8765 (Press CTRL+C to quit)
+C:\pinokio\api\hct6-file-portal\app\env\Lib\site-packages\openpyxl\reader\drawings.py:33: UserWarning: DrawingML support is incomplete and limited to charts and images only. Shapes and drawings will be lost.
+  warn("DrawingML support is incomplete and limited to charts and images only. Shapes and drawings will be lost.")
+C:\pinokio\api\hct6-file-portal\app\env\Lib\site-packages\openpyxl\worksheet\_reader.py:329: UserWarning: Data Validation extension is not supported and will be removed
+  warn(msg)
+C:\pinokio\api\hct6-file-portal\app\env\Lib\site-packages\openpyxl\worksheet\_reader.py:329: UserWarning: Sparkline Group extension is not supported and will be removed
+  warn(msg)
+C:\pinokio\api\hct6-file-portal\app\env\Lib\site-packages\openpyxl\worksheet\_reader.py:329: UserWarning: Unknown extension is not supported and will be removed
+  warn(msg)

@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Cause list · High Court Portal{% endblock %}
+{% block content %}
+<div class="topbar no-print">
+  <div>
+    <p class="kicker">Auto cause list</p>
+    <h2>Daily cause list</h2>
+    <p class="meta">Built from HCT6_HL next dates — the same filter the Excel sheet uses.</p>
+  </div>
+  <div class="actions">
+    <form class="toolbar" method="get" action="/">
+      <input type="hidden" name="tab" value="cause-list">
+      <label>Date
+        <input type="date" name="date_on" value="{{ date_on }}">
+      </label>
+      <button type="submit">Load</button>
+    </form>
+    <button class="btn gold" onclick="window.print()">Print</button>
+  </div>
+</div>
+
+<section class="cause-sheet">
+  <div class="cause-head">
+    <h2>{{ settings.court_name }}</h2>
+    <h3>{{ settings.court_name }}</h3>
+    <p>PRESIDED OVER BY {{ settings.judge_name }}</p>
+    <h3>CAUSE LIST FOR {{ target.strftime("%A, %d %B %Y") }}</h3>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>S/N</th>
+        <th>Suit number</th>
+        <th>Parties</th>
+        <th>Status</th>
+        <th>Claimant counsel</th>
+        <th>Defendant counsel</th>
+        <th>Adj</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for row in rows %}
+      <tr>
+        <td>{{ row.sn }}</td>
+        <td>{{ row.suit }}</td>
+        <td>{{ row.parties }}</td>
+        <td>{{ row.status }}</td>
+        <td>{{ row.claimant }}</td>
+        <td>{{ row.defendant }}</td>
+        <td>{{ row.adj }}</td>
+      </tr>
+    {% else %}
+      <tr><td colspan="7" class="empty">No matter has a next date on this day.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}

@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Authorised deletion · High Court Portal{% endblock %}
+{% block content %}
+<div class="topbar">
+  <div>
+    <p class="kicker">Restricted</p>
+    <h2>Delete a record</h2>
+    <p class="meta">A registrar PIN and a one-time code are required. The default PIN is 000000 unless you changed it in Settings.</p>
+  </div>
+  <a class="btn ghost" href="/?tab=register">Cancel</a>
+</div>
+
+{% if not pin_set %}
+<section class="card">
+  <p>No registrar PIN has been set. Open Settings, create a 6-digit PIN, then return here.</p>
+  <a class="btn gold" href="/?tab=settings">Set registrar PIN</a>
+</section>
+{% elif not record %}
+<section class="card">
+  <p>That record is not on the desk.</p>
+</section>
+{% elif locked %}
+<section class="card">
+  <p>Too many wrong PIN attempts. Deletion is locked until {{ locked.strftime("%H:%M") }}.</p>
+</section>
+{% elif otp %}
+<section class="card stack">
+  <h3>One-time confirmation code</h3>
+  <p class="muted">This is the second factor. Write it down now. It expires in 5 minutes and can be used only once.</p>
+  <p class="otp">{{ otp }}</p>
+  <form class="stack" method="post" action="/delete/confirm">
+    <input type="hidden" name="kind" value="{{ kind }}">
+    <input type="hidden" name="suit" value="{{ suit }}">
+    <input type="hidden" name="hearing_id" value="{{ hearing_id }}">
+    <input type="hidden" name="challenge" value="{{ challenge }}">
+    <label>Registrar PIN
+      <input type="password" name="pin" inputmode="numeric" autocomplete="off" required>
+    </label>
+    <label>One-time code
+      <input name="otp" inputmode="numeric" maxlength="6" autocomplete="off" required>
+    </label>
+    <label>Type the suit number to confirm
+      <input name="confirm_text" placeholder="{{ suit }}" autocomplete="off" required>
+    </label>
+    <div class="actions">
+      <button class="btn danger" type="submit">Delete permanently</button>
+      <a class="btn ghost" href="/?tab=register">Keep the record</a>
+    </div>
+  </form>
+</section>
+{% else %}
+<section class="card stack">
+  <h3>Record to be removed</h3>
+  <p><strong>{{ label }}</strong></p>
+  {% if kind == 'case' %}
+  <p class="muted">Deleting a matter also deletes every sitting in its hearing log.</p>
+  {% endif %}
+  <form method="post" action="/delete/challenge">
+    <input type="hidden" name="kind" value="{{ kind }}">
+    <input type="hidden" name="suit" value="{{ suit }}">
+    <input type="hidden" name="hearing_id" value="{{ hearing_id }}">
+    <button class="btn danger" type="submit">Issue one-time code</button>
+  </form>
+</section>
+{% endif %}
+{% endblock %}

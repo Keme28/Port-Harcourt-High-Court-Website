@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}High Court Portal{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+  <base href="/">
+  <link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+  <a class="skip" href="#content">Skip to content</a>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <img src="/static/icon.png" alt="">
+        <div>
+          <h1>High Court Portal</h1>
+        </div>
+      </div>
+      <nav class="nav">
+        <div class="section">Desk</div>
+        <a href="/?tab=home" class="{{ 'active' if nav == 'home' else '' }}">Home</a>
+        {% if can_write %}
+        <a href="/?tab=file" class="{{ 'active' if nav == 'file' else '' }}">File a matter</a>
+        {% endif %}
+        <a href="/?tab=register" class="{{ 'active' if nav == 'register' else '' }}">Case register</a>
+        <a href="/?tab=hearings" class="{{ 'active' if nav == 'hearings' else '' }}">Hearing log</a>
+        <a href="/?tab=cause-list" class="{{ 'active' if nav == 'cause-list' else '' }}">Cause list</a>
+        <div class="section">Chambers</div>
+        <a href="/?tab=counsel" class="{{ 'active' if nav == 'counsel' else '' }}">Counsel directory</a>
+        <a href="/?tab=insights" class="{{ 'active' if nav == 'insights' else '' }}">Insights</a>
+        <a href="/?tab=quarter" class="{{ 'active' if nav == 'quarter' else '' }}">Quarterly return</a>
+        <a href="/?tab=settings" class="{{ 'active' if nav == 'settings' else '' }}">Settings</a>
+      </nav>
+
+      {% if current_user %}
+      <div class="user-card">
+        <div class="user-avatar">{{ (current_user.display_name or current_user.username)[0].upper() }}</div>
+        <div class="user-info">
+          <div class="user-name" title="{{ current_user.display_name }}">{{ current_user.display_name }}</div>
+          <div class="user-role-badge {{ current_user.role }}">
+            {% if current_user.role == 'admin' %}Administrator
+            {% elif current_user.role == 'registrar' %}Court Registrar
+            {% else %}Judge / Viewer{% endif %}
+          </div>
+        </div>
+        <a href="/logout" class="btn-logout" title="Sign out">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+            <path d="M16 13v-2H7V8l-5 4 5 4v-3h9zM20 3H10c-1.1 0-2 .9-2 2v4h2V5h10v14H10v-4H8v4c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/>
+          </svg>
+        </a>
+      </div>
+      {% endif %}
+    </aside>
+    <main class="main" id="content">
+      {% if read_only_mode or user_read_only %}
+      <div class="read-only-banner">
+        <div class="read-only-badge">READ-ONLY MODE</div>
+        <div>
+          {% if read_only_mode %}
+          <strong>Desk Lock:</strong> System-wide read-only mode is active. Case creation, hearing updates, deletions, and settings changes are disabled.
+          {% else %}
+          <strong>Viewer Access:</strong> You are logged in with Read-Only privileges. Record modifications are restricted.
+          {% endif %}
+        </div>
+      </div>
+      {% endif %}
+
+      {% if flash %}
+      <div class="flash {{ flash_kind }}">{{ flash }}</div>
+      {% endif %}
+      {% block content %}{% endblock %}
+    </main>
+
+  </div>
+  <script src="/static/app.js"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}Home · High Court Portal{% endblock %}
+{% block content %}
+<div class="topbar">
+  <div>
+    <p class="kicker">{{ settings.court_name }}</p>
+    <h2>Registry desk</h2>
+    <p class="meta">{{ settings.judge_name }} · {{ today.strftime("%A, %d %B %Y") }}</p>
+  </div>
+  <div class="actions">
+    <a class="btn gold" href="/?tab=file">File a matter</a>
+    <a class="btn" href="/?tab=hearings">Record sitting</a>
+    <a class="btn ghost" href="/?tab=cause-list">Today's cause list</a>
+  </div>
+</div>
+
+<div class="grid stats">
+  <div class="card stat"><div class="num">{{ stats.active }}</div><div class="lbl">Active cases</div></div>
+  <div class="card stat"><div class="num">{{ today_list|length }}</div><div class="lbl">On today's list</div></div>
+  <div class="card stat"><div class="num">{{ stats.assigned_this_quarter }}</div><div class="lbl">Assigned this quarter</div></div>
+  <div class="card stat"><div class="num">{{ stats.judgments_this_quarter }}</div><div class="lbl">Judgments this quarter</div></div>
+</div>
+
+<div class="grid two" style="margin-top:16px">
+  <section class="card">
+    <h3>Cause list for today</h3>
+    {% if today_list %}
+    <table>
+      <thead><tr><th>#</th><th>Suit</th><th>Parties</th><th>For</th></tr></thead>
+      <tbody>
+      {% for row in today_list %}
+        <tr>
+          <td>{{ row.sn }}</td>
+          <td><a href="/?tab=case&suit={{ row.suit }}">{{ row.suit }}</a></td>
+          <td>{{ row.parties }}</td>
+          <td>{{ row.purpose }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p class="empty">No matter is listed for today. File a matter and give it a next date to populate the list.</p>
+    {% endif %}
+  </section>
+  <section class="card">
+    <h3>Clerk alerts</h3>
+    <div class="alert-list">
+      {% if alerts %}
+        {% for item in alerts %}
+        <a class="alert-item {{ item.level }}" href="{{ item.href }}">
+          <strong>{{ item.title }}</strong>
+          <div class="muted">{{ item.detail }}</div>
+        </a>
+        {% endfor %}
+      {% else %}
+        <p class="empty">No filing gaps right now.</p>
+      {% endif %}
+    </div>
+  </section>
+</div>
+
+<div class="grid split" style="margin-top:16px">
+  <section class="card">
+    <h3>Recently filed</h3>
+    {% if recent_cases %}
+    <table>
+      <thead><tr><th>Suit</th><th>Parties</th><th>Status</th></tr></thead>
+      <tbody>
+      {% for case in recent_cases %}
+        <tr>
+          <td><a href="/?tab=case&suit={{ case['SUIT NUMBER'] }}">{{ case['SUIT NUMBER'] }}</a></td>
+          <td>{{ case.PARTIES }}</td>
+          <td><span class="badge {{ case.status|lower }}">{{ case.STATUS }}</span></td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p class="empty">The Excel register is empty. Start with File a matter — the backend sheets stay as they are.</p>
+    {% endif %}
+  </section>
+  <section class="card">
+    <h3>Latest hearings</h3>
+    {% if recent_hearings %}
+    <table>
+      <thead><tr><th>Date</th><th>Suit</th><th>Purpose</th></tr></thead>
+      <tbody>
+      {% for h in recent_hearings %}
+        <tr>
+          <td>{{ h['HEARING DATE'] }}</td>
+          <td>{{ h['SUIT NUMBER'] }}</td>
+          <td>{{ h.PURPOSE }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p class="empty">No sitting has been logged yet.</p>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

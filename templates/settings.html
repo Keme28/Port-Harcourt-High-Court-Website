@@ -1,0 +1,260 @@
+{% extends "base.html" %}
+{% block title %}Settings · High Court Portal{% endblock %}
+{% block content %}
+<div class="topbar">
+  <div>
+    <p class="kicker">Backend</p>
+    <h2>Court settings</h2>
+    <p class="meta">The workbook stays the system of record. This app never rewrites LISTS, Insights, Back Office, or formulas.</p>
+  </div>
+</div>
+<form class="card stack" method="post" action="/settings">
+  <label>Excel backend
+    <input name="workbook_path" value="{{ workbook }}">
+  </label>
+  <div class="fields">
+    <label>Court name
+      <input name="court_name" value="{{ settings.court_name }}">
+    </label>
+    <label>Court title
+      <input name="court_title" value="{{ settings.court_title }}">
+    </label>
+    <label>Judge
+      <input name="judge_name" value="{{ settings.judge_name }}" list="judges">
+      <datalist id="judges">
+        {% for item in catalogs.judges %}
+        <option value="{{ item }}"></option>
+        {% endfor %}
+      </datalist>
+    </label>
+    <label>Court level
+      <input name="court_level" value="{{ settings.court_level }}" list="courts">
+      <datalist id="courts">
+        {% for item in catalogs.courts %}
+        <option value="{{ item }}"></option>
+        {% endfor %}
+      </datalist>
+    </label>
+    <label>Division
+      <select name="division">
+        <option value="">Select division</option>
+        {% for item in catalogs.divisions %}
+        <option value="{{ item }}" {% if settings.division == item %}selected{% endif %}>{{ item }}</option>
+        {% endfor %}
+        {% if settings.division and settings.division not in catalogs.divisions %}
+        <option value="{{ settings.division }}" selected>{{ settings.division }}</option>
+        {% endif %}
+      </select>
+    </label>
+  </div>
+  <button class="btn gold" type="submit">Save settings</button>
+</form>
+<!-- Read-Only Mode Configuration -->
+<form class="card stack" method="post" action="/settings/read-only" style="margin-top:16px">
+  <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+    <div>
+      <h3 style="margin-bottom:4px;">Read-Only Mode Protection</h3>
+      <p class="muted">When enabled, all modifications (case filings, hearing logs, deletions, court settings) are completely locked across the entire portal.</p>
+    </div>
+    <div>
+      {% if read_only_mode %}
+      <span class="tag alert" style="font-size:14px; font-weight:700; padding:6px 12px;">LOCKED (READ-ONLY)</span>
+      {% else %}
+      <span class="tag ok" style="font-size:14px; font-weight:700; padding:6px 12px;">ACTIVE (READ-WRITE)</span>
+      {% endif %}
+    </div>
+  </div>
+  <div>
+    {% if read_only_mode %}
+    <input type="hidden" name="read_only_mode" value="0">
+    <button class="btn ok" type="submit">Disable Read-Only Mode (Restore Read-Write Access)</button>
+    {% else %}
+    <input type="hidden" name="read_only_mode" value="1">
+    <button class="btn alert" type="submit">Enable Read-Only Mode (Lock Desk)</button>
+    {% endif %}
+  </div>
+</form>
+
+{% if is_admin %}
+<!-- Court Officers & Login Credential Management -->
+<section class="card stack" style="margin-top:16px">
+  <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px;">
+    <div>
+      <h3 style="margin-bottom:4px;">Court Officers & Login Credentials</h3>
+      <p class="muted">Provision login credentials and manage access permissions for Judges, Registrars, and Administrative staff.</p>
+    </div>
+    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+      <span class="tag" style="background:#eef2f6; color:#1e293b; font-size:12px;">⚖️ <strong>Judge:</strong> View & Inspect Only</span>
+      <span class="tag" style="background:#eef2f6; color:#1e293b; font-size:12px;">📋 <strong>Registrar:</strong> Filing & Hearings</span>
+      <span class="tag" style="background:#eef2f6; color:#1e293b; font-size:12px;">🛡️ <strong>Admin:</strong> Full Control</span>
+    </div>
+  </div>
+
+  {% if users %}
+  <div style="overflow-x:auto; margin-top:8px;">
+    <table>
+      <thead>
+        <tr>
+          <th>Court Officer / Name</th>
+          <th>Login Username</th>
+          <th>Email Address</th>
+          <th>Assigned Role</th>
+          <th>Account Status</th>
+          <th>Security & Credential Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for u in users %}
+        <tr>
+          <td>
+            <strong>{{ u.display_name }}</strong>
+            {% if u.id == current_user.id %}
+            <span class="tag ok" style="font-size:10px; margin-left:4px;">You</span>
+            {% endif %}
+          </td>
+          <td>
+            <code style="background:#f1f5f9; padding:2px 6px; border-radius:4px; font-weight:600;">@{{ u.username }}</code>
+          </td>
+          <td>{{ u.email or '—' }}</td>
+          <td>
+            <form method="post" action="/settings/users/role" style="display:inline-flex; gap:4px;">
+              <input type="hidden" name="user_id" value="{{ u.id }}">
+              <select name="role" onchange="this.form.submit()" style="padding:4px 8px; font-size:13px; border-radius:4px;">
+                <option value="readonly" {% if u.role == 'readonly' %}selected{% endif %}>⚖️ Judge (Read-Only)</option>
+                <option value="registrar" {% if u.role == 'registrar' %}selected{% endif %}>📋 Registrar (Filing/Desk)</option>
+                <option value="admin" {% if u.role == 'admin' %}selected{% endif %}>🛡️ Administrator</option>
+              </select>
+            </form>
+          </td>
+          <td>
+            {% if u.active %}
+            <span class="tag ok">Active</span>
+            {% else %}
+            <span class="tag alert">Inactive</span>
+            {% endif %}
+          </td>
+          <td>
+            <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
+              <!-- Reset Password Dropdown Form -->
+              <details style="display:inline-block;">
+                <summary class="btn small" style="cursor:pointer; font-size:12px; padding:4px 8px;">🔑 Reset Password</summary>
+                <div style="position:absolute; background:white; border:1px solid #cbd5e1; box-shadow:0 8px 24px rgba(0,0,0,0.15); border-radius:8px; padding:16px; width:280px; z-index:50; margin-top:6px;">
+                  <h4 style="margin:0 0 8px 0; font-size:14px;">Reset Password for @{{ u.username }}</h4>
+                  <form method="post" action="/settings/users/password" class="stack">
+                    <input type="hidden" name="user_id" value="{{ u.id }}">
+                    <label style="font-size:12px; margin-bottom:4px;">New Password
+                      <input type="password" name="new_password" placeholder="At least 8 chars" required style="font-size:12px; padding:6px;">
+                    </label>
+                    <label style="font-size:12px; margin-bottom:6px;">Confirm Password
+                      <input type="password" name="confirm_password" placeholder="Re-type password" required style="font-size:12px; padding:6px;">
+                    </label>
+                    <button class="btn gold small" type="submit" style="width:100%;">Save New Password</button>
+                  </form>
+                </div>
+              </details>
+
+              <!-- Activate / Deactivate -->
+              <form method="post" action="/settings/users/active" style="display:inline;">
+                <input type="hidden" name="user_id" value="{{ u.id }}">
+                <input type="hidden" name="active" value="{{ '0' if u.active else '1' }}">
+                <button class="btn small" type="submit" title="{{ 'Deactivate account' if u.active else 'Activate account' }}">
+                  {{ 'Deactivate' if u.active else 'Activate' }}
+                </button>
+              </form>
+
+              <!-- Delete User -->
+              {% if u.id != current_user.id %}
+              <form method="post" action="/settings/users/delete" onsubmit="return confirm('Permanently delete account for {{ u.display_name }} (@{{ u.username }})?');" style="display:inline;">
+                <input type="hidden" name="user_id" value="{{ u.id }}">
+                <button class="btn small danger" type="submit" title="Delete account">Delete</button>
+              </form>
+              {% endif %}
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+
+  <!-- Officer Creation Console -->
+  <div style="margin-top:16px; border-top:1px solid var(--border-color, #e2e8f0); padding-top:16px;">
+    <h4 style="margin:0 0 10px 0; color:var(--gold, #b8860b);">➕ Create New Officer Credentials</h4>
+    <form method="post" action="/settings/users/create" class="stack">
+      <div class="fields">
+        <label>Officer Full Name & Title
+          <input type="text" name="display_name" placeholder="e.g. Hon. Justice S. A. Adeyemi or Registrar B. Ibrahim" required>
+        </label>
+        <label>Login Username
+          <input type="text" name="username" placeholder="e.g. judge.adeyemi or registrar.ibrahim" required autocomplete="off">
+        </label>
+      </div>
+      <div class="fields">
+        <label>Email Address (Optional)
+          <input type="email" name="email" placeholder="e.g. adeyemi@judiciary.gov.ng">
+        </label>
+        <label>Officer Role & Station
+          <select name="role" required>
+            <option value="readonly" selected>⚖️ Judge / Legal Assistant (Read-Only: View Cases, Cause List, Returns)</option>
+            <option value="registrar">📋 Court Registrar / Clerk (Read-Write: Desk Filing & Hearing Logs)</option>
+            <option value="admin">🛡️ Administrator (Full Control: Users, Passwords & System Settings)</option>
+          </select>
+        </label>
+      </div>
+      <label>Initial Login Password
+        <input type="password" name="password" placeholder="At least 8 characters (officer will use this to sign in)" required autocomplete="new-password">
+      </label>
+      <div>
+        <button class="btn gold" type="submit">Create Officer Login Account</button>
+      </div>
+    </form>
+  </div>
+</section>
+{% endif %}
+
+
+<form class="card stack" method="post" action="/settings/pin" style="margin-top:16px">
+  <h3>Registrar PIN</h3>
+  <p class="muted">Required to delete a matter or sitting. Deletion also needs a one-time code issued at the time of removal.</p>
+  <p class="muted">Default PIN is <strong>000000</strong>. Change it after the first use if you want a private code.</p>
+  <p class="muted">Status: {% if pin_set %}PIN is set.{% else %}No PIN yet.{% endif %}</p>
+  {% if pin_set %}
+  <label>Current PIN
+    <input type="password" name="current_pin" inputmode="numeric" autocomplete="off">
+  </label>
+  {% endif %}
+  <div class="fields">
+    <label>New PIN (6 or more digits)
+      <input type="password" name="new_pin" inputmode="numeric" autocomplete="off" required>
+    </label>
+    <label>Confirm new PIN
+      <input type="password" name="confirm_pin" inputmode="numeric" autocomplete="off" required>
+    </label>
+  </div>
+  <button class="btn" type="submit">Save registrar PIN</button>
+</form>
+{% if audit %}
+<section class="card" style="margin-top:16px">
+  <h3>Deletion & Security Audit</h3>
+  <table>
+    <thead><tr><th>When</th><th>Action</th><th>Record / Detail</th></tr></thead>
+    <tbody>
+    {% for item in audit %}
+      <tr>
+        <td>{{ item.created }}</td>
+        <td>{{ item.action }} · {{ item.kind }}</td>
+        <td>{{ item.target }}{% if item.detail %} <span class="muted">({{ item.detail }})</span>{% endif %}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endif %}
+<form class="card stack" method="post" action="/export" style="margin-top:16px">
+  <h3>Export to Excel</h3>
+  <p class="muted">New filings already write into the live Excel working copy. Export makes a fresh timestamped workbook from the original template.</p>
+  <button class="btn" type="submit">Export working copy</button>
+</form>
+{% endblock %}
+

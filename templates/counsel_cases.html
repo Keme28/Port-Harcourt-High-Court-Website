@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}{{ name }} · Counsel · High Court Portal{% endblock %}
+{% block content %}
+<div class="topbar">
+  <div>
+    <p class="kicker">Counsel dossier</p>
+    <h2>{{ name }}</h2>
+    <p class="meta">{{ roles or 'Counsel' }} · {{ matters }} linked matter{{ 's' if matters != 1 else '' }} · {{ active }} active</p>
+    {% if phone %}<p class="meta">{{ phone }}</p>{% endif %}
+    {% if email %}<p class="meta">{{ email }}</p>{% endif %}
+  </div>
+  <a class="btn ghost" href="/?tab=counsel">Back to directory</a>
+</div>
+
+<section class="card">
+  {% if cases %}
+  <table>
+    <thead>
+      <tr>
+        <th>Suit</th>
+        <th>Parties</th>
+        <th>Appears as</th>
+        <th>Type</th>
+        <th>Status</th>
+        <th>Next date</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for case in cases %}
+      <tr>
+        <td><a href="/?tab=case&suit={{ case['SUIT NUMBER'] }}">{{ case['SUIT NUMBER'] }}</a></td>
+        <td>{{ case.PARTIES }}</td>
+        <td>{{ case.appears_as }}</td>
+        <td>{{ case['CASE TYPE'] }}</td>
+        <td><span class="badge {{ case.status|lower }}">{{ case.STATUS }}</span></td>
+        <td>{{ case.last_hearing.next_on if case.last_hearing and case.last_hearing.next_on else "—" }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="empty">No matter on the register is linked to this counsel.</p>
+  {% endif %}
+</section>
+{% endblock %}

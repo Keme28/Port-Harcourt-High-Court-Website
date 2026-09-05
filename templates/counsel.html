@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Counsel directory · High Court Portal{% endblock %}
+{% block content %}
+<div class="topbar">
+  <div>
+    <p class="kicker">From the register</p>
+    <h2>Counsel directory</h2>
+    <p class="meta">Extracted from claimant and defendant columns. Excel still builds the same list from HCT6_CR.</p>
+  </div>
+</div>
+<form class="toolbar" method="get" action="/">
+  <input type="hidden" name="tab" value="counsel">
+  <label>Search
+    <input name="q" value="{{ q }}" placeholder="Name, phone or email">
+  </label>
+  <button type="submit">Find</button>
+</form>
+<section class="card">
+  {% if directory %}
+  <table>
+    <thead><tr><th>Counsel</th><th>Phone</th><th>Email</th><th>Appears as</th><th>Matters</th></tr></thead>
+    <tbody>
+    {% for item in directory %}
+      <tr>
+        <td><a href="/?tab=counsel&name={{ item.name|urlencode }}">{{ item.name }}</a></td>
+        <td>{{ item.phone }}</td>
+        <td>{{ item.email }}</td>
+        <td>{{ item.roles }}</td>
+        <td>{{ item.matters }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="empty">No counsel names are on the register yet.</p>
+  {% endif %}
+</section>
+{% endblock %}

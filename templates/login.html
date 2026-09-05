@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sign in · High Court Portal</title>
+  <base href="/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/app.css">
+</head>
+<body class="auth-body">
+  <div class="auth-shell">
+    <div class="auth-header">
+      <div class="auth-brand">
+        <img src="/static/icon.png" alt="High Court Portal logo">
+        <div>
+          <h1>High Court Portal</h1>
+        </div>
+      </div>
+      <div class="auth-tag">Secure desk</div>
+    </div>
+    <div class="card">
+      <div class="auth-form-wrap">
+        <div>
+          <h2>Sign in</h2>
+          <p class="auth-copy">Access the filing desk, register, and cause list from a secure court work station.</p>
+        </div>
+
+        {% if error %}
+        <div class="auth-error">{{ error }}</div>
+        {% endif %}
+
+        <form class="auth-form" method="post" action="/login" style="margin-top:12px;">
+          <input type="hidden" name="next" value="{{ next }}">
+
+          <label>
+            Username or Email
+            <input type="text" name="username" autocomplete="username" placeholder="e.g. registrar, judge.adeyemi or officer@court.gov.ng" required autofocus>
+          </label>
+
+          <label>
+            Password
+            <input type="password" name="password" autocomplete="current-password" placeholder="Enter your portal password" required>
+          </label>
+
+          <div class="auth-actions">
+            <button class="btn gold full-width" type="submit">Sign in</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>

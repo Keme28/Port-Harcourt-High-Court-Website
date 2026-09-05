@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Something went wrong · High Court Portal{% endblock %}
+{% block content %}
+<div class="topbar">
+  <div>
+    <p class="kicker">Desk</p>
+    <h2>The page could not be shown</h2>
+    <p class="meta">The portal is still running. Go back and try the step again.</p>
+  </div>
+  <a class="btn gold" href="/">Back to home</a>
+</div>
+<section class="card">
+  <p>{{ error }}</p>
+</section>
+{% endblock %}

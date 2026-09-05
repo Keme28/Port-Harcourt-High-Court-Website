@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% block title %}File a matter · High Court Portal{% endblock %}
+{% block content %}
+<div class="topbar">
+  <div>
+    <p class="kicker">Case register</p>
+    <h2>File a matter</h2>
+    <p class="meta">Saves to the desk and writes the same row into the Excel case register (HCT6_CR).</p>
+  </div>
+</div>
+
+{% if errors %}
+<div class="errors">
+  {% for error in errors %}<div>{{ error }}</div>{% endfor %}
+</div>
+{% endif %}
+
+<form class="card stack" method="post" action="/file">
+  <div class="fields">
+    <label>Suit number
+      <input name="SUIT NUMBER" value="{{ (case or {}).get('SUIT NUMBER', suggested_suit) }}" required>
+    </label>
+    <label>Status
+      <select name="STATUS">
+        {% for item in catalogs.status %}
+        <option value="{{ item }}" {% if (case or {}).get('STATUS', 'ACTIVE') == item %}selected{% endif %}>{{ item }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label class="full">Parties
+      <textarea name="PARTIES" required placeholder="A. B. CLAIMANT  v  C. D. DEFENDANT">{{ (case or {}).get('PARTIES', '') }}</textarea>
+    </label>
+    <label>Case type
+      <select name="CASE TYPE" required>
+        <option value="">Select</option>
+        {% for item in catalogs.case_types %}
+        <option value="{{ item }}" {% if (case or {}).get('CASE TYPE') == item %}selected{% endif %}>{{ item }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>Nature of claim
+      <select name="NATURE OF CLAIM" data-current="{{ (case or {}).get('NATURE OF CLAIM', '') }}">
+        <option value="">Select case type first</option>
+      </select>
+    </label>
+    <label>Particulars
+      <select name="PARTICULARS" data-current="{{ (case or {}).get('PARTICULARS', '') }}">
+        <option value="">Select nature first</option>
+      </select>
+    </label>
+    <label>Details
+      <select name="DETAILS" data-current="{{ (case or {}).get('DETAILS', '') }}">
+        <option value="">Select particulars first</option>
+      </select>
+    </label>
+  </div>
+
+  <h3>Counsel</h3>
+  <div class="fields">
+    <label>Known claimant counsel
+      <select data-counsel="claimant">
+        <option value="">Type below or pick a known counsel</option>
+        {% for item in directory %}
+        <option value="{{ item.name }}" data-phone="{{ item.phone }}" data-email="{{ item.email }}">{{ item.name }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>Known defendant counsel
+      <select data-counsel="defendant">
+        <option value="">Type below or pick a known counsel</option>
+        {% for item in directory %}
+        <option value="{{ item.name }}" data-phone="{{ item.phone }}" data-email="{{ item.email }}">{{ item.name }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>Claimant counsel
+      <input name="CLAIMANT COUNSEL" value="{{ (case or {}).get('CLAIMANT COUNSEL', '') }}">
+    </label>
+    <label>Defendant counsel
+      <input name="DEFENDANT COUNSEL" value="{{ (case or {}).get('DEFENDANT COUNSEL', '') }}">
+    </label>
+    <label>Claimant phone
+      <input name="PHONE NUMBER" value="{{ (case or {}).get('PHONE NUMBER', '') }}" placeholder="08012345678">
+    </label>
+    <label>Defendant phone
+      <input name="PHONE NUMBER2" value="{{ (case or {}).get('PHONE NUMBER2', '') }}" placeholder="08012345678">
+    </label>
+    <label>Claimant email
+      <input name="E-MAIL" value="{{ (case or {}).get('E-MAIL', '') }}">
+    </label>
+    <label>Defendant email
+      <input name="E-MAIL2" value="{{ (case or {}).get('E-MAIL2', '') }}">
+    </label>
+  </div>
+
+  <h3>Dates</h3>
+  <div class="fields three">
+    <label>Date filed
+      <input type="date" name="DATE FILED" value="{{ (case or {}).get('DATE FILED', today.isoformat()) }}" required>
+    </label>
+    <label>Date assigned
+      <input type="date" name="DATE ASSIGNED" value="{{ (case or {}).get('DATE ASSIGNED', today.isoformat()) }}">
+    </label>
+    <label>Trial commenced
+      <input type="date" name="DATE TRIAL COMMENCED" value="{{ (case or {}).get('DATE TRIAL COMMENCED', '') }}">
+    </label>
+  </div>
+
+  <h3>Optional first listing</h3>
+  <div class="fields">
+    <label>List this matter on
+      <input type="date" name="list_for">
+    </label>
+    <label>First purpose
+      <select name="first_purpose">
+        <option value="FOR MENTION">FOR MENTION</option>
+        {% for item in catalogs.purpose %}
+        <option value="{{ item }}">{{ item }}</option>
+        {% endfor %}
+      </select>
+    </label>
+  </div>
+
+  <div class="actions">
+    <button class="btn gold" type="submit">File on the register</button>
+    <a class="btn ghost" href="/?tab=register">Cancel</a>
+  </div>
+</form>
+<script id="lookup-data" type="application/json">{{ catalogs | tojson }}</script>
+{% endblock %}

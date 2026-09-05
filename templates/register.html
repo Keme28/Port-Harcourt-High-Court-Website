@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Case register · High Court Portal{% endblock %}
+{% block content %}
+<div class="topbar">
+  <div>
+    <p class="kicker">Case register</p>
+    <h2>Case register</h2>
+    <p class="meta">{{ cases|length }} shown of {{ total }} matters on the Excel backend.</p>
+  </div>
+  <a class="btn gold" href="/?tab=file">File a matter</a>
+</div>
+
+<form class="toolbar no-print" method="get" action="/">
+  <input type="hidden" name="tab" value="register">
+  <label>Search
+    <input name="q" value="{{ q }}" placeholder="Suit, parties, counsel">
+  </label>
+  <label>Status
+    <select name="status">
+      <option value="">All</option>
+      {% for item in catalogs.status %}
+      <option value="{{ item }}" {% if status == item %}selected{% endif %}>{{ item }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label>Case type
+    <select name="case_type">
+      <option value="">All</option>
+      {% for item in catalogs.case_types %}
+      <option value="{{ item }}" {% if case_type == item %}selected{% endif %}>{{ item }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <button type="submit">Filter</button>
+</form>
+
+<section class="card">
+  {% if cases %}
+  <table>
+    <thead>
+      <tr>
+        <th>Suit</th><th>Parties</th><th>Counsel</th><th>Type</th><th>Status</th><th>Next</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for case in cases %}
+      <tr>
+        <td><a href="/?tab=case&suit={{ case['SUIT NUMBER'] }}">{{ case['SUIT NUMBER'] }}</a></td>
+        <td>{{ case.PARTIES }}</td>
+        <td>
+          {% if case['CLAIMANT COUNSEL'] %}<a href="/?tab=counsel&name={{ case['CLAIMANT COUNSEL']|urlencode }}">{{ case['CLAIMANT COUNSEL'] }}</a>{% endif %}
+          {% if case['DEFENDANT COUNSEL'] %}<div><a href="/?tab=counsel&name={{ case['DEFENDANT COUNSEL']|urlencode }}">{{ case['DEFENDANT COUNSEL'] }}</a></div>{% endif %}
+        </td>
+        <td>{{ case['CASE TYPE'] }}</td>
+        <td><span class="badge {{ case.status|lower }}">{{ case.STATUS }}</span></td>
+        <td>{{ case.last_hearing.next_on if case.last_hearing and case.last_hearing.next_on else "—" }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="empty">No matters match this filter.</p>
+  {% endif %}
+</section>
+{% endblock %}

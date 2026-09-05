@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block title %}Quarterly return · High Court Portal{% endblock %}
+{% block content %}
+<div class="topbar no-print">
+  <div>
+    <p class="kicker">NJC performance return</p>
+    <h2>Quarterly report</h2>
+    <p class="meta">Edit the judge particulars below. Figures come from the live register and hearing log.</p>
+  </div>
+  <div class="actions">
+    <form class="toolbar" method="get" action="/">
+      <input type="hidden" name="tab" value="quarter">
+      <label>Year <input type="number" name="year" value="{{ stats.year }}"></label>
+      <label>Quarter
+        <select name="quarter">
+          {% for item in catalogs.quarters %}
+          <option value="{{ item }}" {% if stats.quarter == item %}selected{% endif %}>{{ item }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <button type="submit">Load</button>
+    </form>
+    <button class="btn gold" onclick="window.print()">Print</button>
+  </div>
+</div>
+
+<form class="card stack no-print" method="post" action="/quarter/particulars" style="margin-bottom:16px">
+  <h3>Particulars of the judge</h3>
+  <input type="hidden" name="year" value="{{ stats.year }}">
+  <input type="hidden" name="quarter" value="{{ stats.quarter }}">
+  <div class="fields">
+    <label>Name of judge
+      <input name="judge_name" value="{{ settings.judge_name }}" list="judges" required>
+      <datalist id="judges">
+        {% for item in catalogs.judges %}
+        <option value="{{ item }}"></option>
+        {% endfor %}
+      </datalist>
+    </label>
+    <label>Court
+      <input name="court_level" value="{{ settings.court_level }}" list="courts">
+      <datalist id="courts">
+        {% for item in catalogs.courts %}
+        <option value="{{ item }}"></option>
+        {% endfor %}
+      </datalist>
+    </label>
+    <label>Division
+      <select name="division">
+        <option value="">Select division</option>
+        {% for item in catalogs.divisions %}
+        <option value="{{ item }}" {% if settings.division == item %}selected{% endif %}>{{ item }}</option>
+        {% endfor %}
+        {% if settings.division and settings.division not in catalogs.divisions %}
+        <option value="{{ settings.division }}" selected>{{ settings.division }}</option>
+        {% endif %}
+      </select>
+    </label>
+    <label>Court name on the return
+      <input name="court_name" value="{{ settings.court_name }}">
+    </label>
+  </div>
+  <button class="btn gold" type="submit">Save judge particulars</button>
+</form>
+
+<section class="cause-sheet">
+  <div class="cause-head">
+    <h2>{{ settings.court_name }}</h2>
+    <h3>Quarterly return · {{ stats.quarter }} {{ stats.year }}</h3>
+    <p>{{ settings.judge_name }} · {{ settings.court_level }} · {{ settings.division }}</p>
+    <p>{{ stats.start }} to {{ stats.end }}</p>
+  </div>
+  <h3>1. Particulars of the judge</h3>
+  <table>
+    <tr><th>Name of judge</th><td>{{ settings.judge_name }}</td></tr>
+    <tr><th>Court</th><td>{{ settings.court_level }}</td></tr>
+    <tr><th>Division</th><td>{{ settings.division }}</td></tr>
+  </table>
+  <h3>2. Statistical summary</h3>
+  <table>
+    <tr><th>New cases assigned</th><td>{{ stats.assigned_this_quarter }}</td></tr>
+    <tr><th>Judgments delivered</th><td>{{ stats.judgments_this_quarter }}</td></tr>
+    <tr><th>Rulings delivered</th><td>{{ stats.rulings_this_quarter }}</td></tr>
+    <tr><th>Matters struck out</th><td>{{ stats.struck_out }}</td></tr>
+    <tr><th>Matters withdrawn</th><td>{{ stats.withdrawn }}</td></tr>
+    <tr><th>Matters settled</th><td>{{ stats.settled }}</td></tr>
+    <tr><th>Pending at end of quarter</th><td>{{ stats.active }}</td></tr>
+    <tr><th>Pending over one year</th><td>{{ stats.pending_over_one }}</td></tr>
+    <tr><th>Pending over five years</th><td>{{ stats.pending_over_five }}</td></tr>
+    <tr><th>Sittings held</th><td>{{ stats.sittings }}</td></tr>
+    <tr><th>Adjournments — court not sitting</th><td>{{ stats.court_not_sitting }}</td></tr>
+  </table>
+  <h3>3. Judgments and rulings in the quarter</h3>
+  <table>
+    <thead><tr><th>Date</th><th>Suit</th><th>Parties</th><th>Outcome</th></tr></thead>
+    <tbody>
+    {% for h in hearings %}
+      <tr>
+        <td>{{ h['HEARING DATE'] }}</td>
+        <td>{{ h['SUIT NUMBER'] }}</td>
+        <td>{{ h.PARTIES }}</td>
+        <td>{{ h.OUTCOME }}</td>
+      </tr>
+    {% else %}
+      <tr><td colspan="4">No data provided yet.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  <p class="meta">I, the undersigned, hereby affirm that the information in this quarterly return is true and submitted in good faith in accordance with the directives of the National Judicial Council.</p>
+  <p>Judge's signature: ______________________ &nbsp;&nbsp; Date: {{ today.isoformat() }}</p>
+</section>
+{% endblock %}

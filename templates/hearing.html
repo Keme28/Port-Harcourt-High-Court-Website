@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block title %}Hearing log · High Court Portal{% endblock %}
+{% block content %}
+<div class="topbar">
+  <div>
+    <p class="kicker">Hearing log</p>
+    <h2>Record a sitting</h2>
+    <p class="meta">Pick a suit. Parties and counsel fill from the register the same way Excel XLOOKUP does.</p>
+  </div>
+</div>
+
+{% if errors %}
+<div class="errors">{% for error in errors %}<div>{{ error }}</div>{% endfor %}</div>
+{% endif %}
+
+<div class="grid two">
+  <form class="card stack" method="post" action="/hearings">
+    <label>Suit number
+      <select name="SUIT NUMBER" id="suit-picker" required>
+        <option value="">Select from the register</option>
+        {% for case in cases %}
+        <option value="{{ case['SUIT NUMBER'] }}" {% if selected_suit == case['SUIT NUMBER'] %}selected{% endif %}>
+          {{ case['SUIT NUMBER'] }} — {{ case.PARTIES }}
+        </option>
+        {% endfor %}
+      </select>
+    </label>
+    <div id="case-preview" class="muted"></div>
+    <div class="fields">
+      <label>Hearing date
+        <input type="date" name="HEARING DATE" value="{{ draft.get('HEARING DATE', today.isoformat()) }}" required>
+      </label>
+      <label>Purpose
+        <select name="PURPOSE" required>
+          <option value="">Select</option>
+          {% for item in catalogs.purpose %}
+          <option value="{{ item }}" {% if draft.get('PURPOSE') == item %}selected{% endif %}>{{ item }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>Outcome
+        <select name="OUTCOME">
+          <option value="">Select</option>
+          {% for item in catalogs.outcomes %}
+          <option value="{{ item }}" {% if draft.get('OUTCOME') == item %}selected{% endif %}>{{ item }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>Next action
+        <select name="NEXT ACTION">
+          <option value="">Select</option>
+          {% for item in catalogs.actions %}
+          <option value="{{ item }}" {% if draft.get('NEXT ACTION') == item %}selected{% endif %}>{{ item }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>Next date
+        <input type="date" name="NEXT DATE" value="{{ draft.get('NEXT DATE', '') }}">
+      </label>
+      <label>Ruling
+        <select name="RULING">
+          <option value="">—</option>
+          {% for item in catalogs.rulings %}
+          <option value="{{ item }}" {% if draft.get('RULING') == item %}selected{% endif %}>{{ item }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>Date concluded
+        <input type="date" name="DATE CONCLUDED" value="{{ draft.get('DATE CONCLUDED', '') }}">
+      </label>
+      <label>Mark concluded on the register if this sitting ends the matter
+        <select name="auto_conclude">
+          <option value="auto">Automatic (judgment, struck out, withdrawn, settled)</option>
+          <option value="yes">Yes, conclude now</option>
+          <option value="no">No, leave status as it is</option>
+        </select>
+      </label>
+    </div>
+    <button class="btn gold" type="submit">Write hearing to Excel</button>
+  </form>
+
+  <section class="card">
+    <h3>Recent log</h3>
+    {% if hearings %}
+    <table>
+      <thead><tr><th>Date</th><th>Suit</th><th>Purpose</th><th>Next</th><th></th></tr></thead>
+      <tbody>
+      {% for h in hearings[:20] %}
+        <tr>
+          <td>{{ h['HEARING DATE'] }}</td>
+          <td><a href="/?tab=case&suit={{ h['SUIT NUMBER'] }}">{{ h['SUIT NUMBER'] }}</a></td>
+          <td>{{ h.PURPOSE }}</td>
+          <td>{{ h['NEXT DATE'] or '—' }}</td>
+          <td><a href="/?tab=delete&kind=hearing&suit={{ h['SUIT NUMBER'] }}&id={{ h.id }}">Delete</a></td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p class="empty">The hearing log has no completed rows yet.</p>
+    {% endif %}
+  </section>
+</div>
+<script id="case-data" type="application/json">{{ cases | tojson }}</script>
+{% endblock %}

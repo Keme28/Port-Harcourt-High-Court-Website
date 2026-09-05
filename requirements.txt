@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+openpyxl
+jinja2
+python-multipart
+itsdangerous
+httpx
+python-dotenv
