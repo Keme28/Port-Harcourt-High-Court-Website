@@ -1,0 +1,5 @@
+{
+  "title": "High Court Portal",
+  "description": "High Court filing desk. Automates case intake, hearings, and cause lists on top of the existing Excel backend without changing it.",
+  "icon": "icon.png"
+}

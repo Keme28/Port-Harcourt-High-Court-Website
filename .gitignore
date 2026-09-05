@@ -1,0 +1,10 @@
+app/env
+app/data/backups/
+app/data/exports/
+app/data/portal.sqlite
+app/data/settings.json
+app/data/auth.json
+**/__pycache__/
+*.pyc
+*.pyo
+.DS_Store
